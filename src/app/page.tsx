@@ -1,5 +1,3 @@
-'use client';
-
 export default function Home() {
   return (
     <>
@@ -38,47 +36,6 @@ export default function Home() {
           font-size: 1.25rem;
           font-weight: 700;
           color: #111827;
-          text-decoration: none;
-        }
-        .nav-links {
-          display: flex;
-          align-items: center;
-          gap: 24px;
-        }
-        .nav-links a:not(.btn) {
-          color: #4b5563;
-          text-decoration: none;
-          font-size: 0.95rem;
-          transition: color 0.2s;
-        }
-        .nav-links a:not(.btn):hover {
-          color: #111827;
-        }
-        .btn {
-          display: inline-block;
-          padding: 10px 20px;
-          border-radius: 8px;
-          font-weight: 600;
-          font-size: 0.95rem;
-          text-decoration: none;
-          transition: all 0.2s ease;
-          cursor: pointer;
-        }
-        .btn-primary {
-          background-color: #2563eb;
-          color: #ffffff;
-        }
-        .btn-primary:hover {
-          background-color: #1d4ed8;
-          transform: translateY(-1px);
-        }
-        .btn-secondary {
-          background-color: #ffffff;
-          color: #374151;
-          border: 1px solid #d1d5db;
-        }
-        .btn-secondary:hover {
-          background-color: #f3f4f6;
         }
         .hero {
           padding: 100px 0 80px;
@@ -105,14 +62,9 @@ export default function Home() {
         }
         .hero p {
           max-width: 600px;
-          margin: 0 auto 36px;
+          margin: 0 auto;
           color: #4b5563;
           font-size: 1.125rem;
-        }
-        .hero-actions {
-          display: flex;
-          justify-content: center;
-          gap: 16px;
         }
         .features {
           padding: 80px 0;
@@ -141,11 +93,6 @@ export default function Home() {
           border-radius: 16px;
           border: 1px solid #e5e7eb;
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07);
         }
         .card-icon {
           font-size: 2rem;
@@ -166,38 +113,16 @@ export default function Home() {
           background: #ffffff;
           padding: 32px 0;
           margin-top: 60px;
-        }
-        .footer-inner {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 16px;
+          text-align: center;
           color: #6b7280;
           font-size: 0.9rem;
         }
-        .footer-links {
-          display: flex;
-          gap: 20px;
-        }
-        .footer-links a {
-          color: #6b7280;
-          text-decoration: none;
-        }
-        .footer-links a:hover {
-          color: #111827;
-        }
       `}</style>
 
-      {/* ヘッダーナビゲーション */}
+      {/* ヘッダー */}
       <header className="site-header">
         <div className="container header-inner">
-          <a href="#" className="logo">BrandName</a>
-          <nav className="nav-links">
-            <a href="#features">特徴</a>
-            <a href="#about">私たちについて</a>
-            <a href="#contact" className="btn btn-primary">お問い合わせ</a>
-          </nav>
+          <span className="logo">BrandName</span>
         </div>
       </header>
 
@@ -205,24 +130,20 @@ export default function Home() {
       <main>
         {/* ヒーローセクション */}
         <section className="hero">
-          <div className="container hero-content">
+          <div className="container">
             <span className="badge">New Release 2026</span>
             <h1>
-              お砂糖とお醤油、<br />
+              横転だけで世界一周、<br />
               新しい体験をここから。
             </h1>
             <p>
               無駄を削ぎ落としたデザインと直感的な操作性で、あなたのアイデアを最短距離で形にします。
             </p>
-            <div className="hero-actions">
-              <a href="#start" className="btn btn-primary">無料で始める</a>
-              <a href="#learn-more" className="btn btn-secondary">詳しく見る</a>
-            </div>
           </div>
         </section>
 
         {/* 特徴セクション（3カラム） */}
-        <section id="features" className="features">
+        <section className="features">
           <div className="container">
             <div className="section-header">
               <h2>選ばれる3つの理由</h2>
@@ -251,12 +172,8 @@ export default function Home() {
 
       {/* フッター */}
       <footer className="site-footer">
-        <div className="container footer-inner">
+        <div className="container">
           <p>&copy; 2026 BrandName. All rights reserved.</p>
-          <div className="footer-links">
-            <a href="#">プライバシーポリシー</a>
-            <a href="#">利用規約</a>
-          </div>
         </div>
       </footer>
     </>
