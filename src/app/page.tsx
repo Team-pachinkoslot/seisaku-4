@@ -208,7 +208,7 @@ export default function Home() {
           <div className="container hero-content">
             <span className="badge">New Release 2026</span>
             <h1>
-              シンプルで心地よい、<br />
+              お砂糖とお醤油、<br />
               新しい体験をここから。
             </h1>
             <p>
