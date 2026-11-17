@@ -10,12 +10,15 @@ export default function LinuxTerminal() {
     if (emulatorRef.current || !screenRef.current) return;
 
     const initV86 = async () => {
+      // ブラウザ環境に Node.js の global 変数を擬似的に定義する
+      (window as any).global = window;
+
       const { V86 } = await import("v86");
 
       emulatorRef.current = new V86({
         wasm_path: "/v86/v86.wasm",
-        memory_size: 128 * 1024 * 1024,
-        vga_memory_size: 2 * 1024 * 1024,
+        memory_size: 256 * 1024 * 1024,
+        vga_memory_size: 8 * 1024 * 1024,
         screen_container: screenRef.current,
         bios: {
           url: "/v86/seabios.bin",
@@ -23,8 +26,8 @@ export default function LinuxTerminal() {
         vga_bios: {
           url: "/v86/vgabios.bin",
         },
-        bzimage: {
-          url: "/v86/buildroot-bzimage.bin",
+        cdrom: {
+          url: "/v86/alpine-virt.iso",
         },
         autostart: true,
       });
@@ -41,13 +44,19 @@ export default function LinuxTerminal() {
   }, []);
 
   return (
-    <div className="bg-black text-white p-4 rounded-lg border border-gray-700 overflow-hidden">
+    <div className="bg-zinc-900 p-4 rounded-lg border-2 border-green-500 overflow-x-auto">
       <div
         ref={screenRef}
-        className="font-mono text-sm leading-tight"
-        style={{ whiteSpace: "pre", minHeight: "400px" }}
+        style={{
+          whiteSpace: "pre",
+          fontFamily: "monospace",
+          fontSize: "14px",
+          lineHeight: "1.2",
+          color: "#4ade80",
+          minHeight: "400px",
+        }}
       >
-        <div style={{ fontFamily: "monospace", fontSize: "14px", lineHeight: "1.2" }}></div>
+        <div></div>
         <canvas style={{ display: "none" }}></canvas>
       </div>
     </div>
