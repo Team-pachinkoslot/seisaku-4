@@ -1,169 +1,281 @@
 // src/app/page.tsx
+// 電車の画像: public/minato-train.png
+"use client";
 
-const stages = [
-  {
-    number: 1,
-    title: "公開サイト",
-    description: "入力の検証と、サーバーから外部への通信制限を確認する。",
-    accent: "#2583a1",
-  },
-  {
-    number: 2,
-    title: "権限管理",
-    description: "運行管理画面で、利用者の役割に応じたアクセス制限を確認する。",
-    accent: "#73a2cb",
-  },
-  {
-    number: 3,
-    title: "内部 API",
-    description: "信号設備の状態を表示する模擬 API で、認証とキーの管理を確認する。",
-    accent: "#b75b71",
-  },
-  {
-    number: 4,
-    title: "中央サーバー",
-    description: "模擬監査ログを確認し、各段階で見つけた課題を整理する。",
-    accent: "#ef4868",
-  },
+import Image from "next/image";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+
+const scenarios = [
+  { id: "01", title: "初期侵入", description: "公開サイトの模擬アクセス記録から、最初の異常を確認する。" },
+  { id: "02", title: "権限昇格", description: "運行管理画面の模擬記録から、アカウントの権限変更を確認する。" },
+  { id: "03", title: "横展開", description: "信号設備の模擬通信記録から、異常が及んだ範囲を確認する。" },
+  { id: "04", title: "最終到達", description: "中央サーバーの模擬監査ログから、調査の最後の手がかりを確認する。" },
 ];
 
 export default function Home() {
+  const [scenario, setScenario] = useState(scenarios[0]);
+  const [command, setCommand] = useState("");
+  const [history, setHistory] = useState<string[]>([]);
+  const outputRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const output = outputRef.current;
+    if (output) output.scrollTop = output.scrollHeight;
+  }, [history]);
+
+  function runCommand(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const input = command.trim().replace(/\s+/g, " ");
+    if (!input) return;
+    setCommand("");
+
+    if (input === "clear") {
+      setHistory([]);
+      return;
+    }
+
+    const responses = new Map([
+      ["help", "help  ls  cat scenario.txt  clear"],
+      ["ls", "scenario.txt"],
+      ["cat scenario.txt", `Stage ${scenario.id} ${scenario.title}\n${scenario.description}`],
+    ]);
+    const output = responses.get(input) ?? "未対応のコマンドです。help で一覧を表示できます。";
+    setHistory((previous) => [...previous, `operator@minato:~$ ${input}\n${output}`]);
+  }
+
   return (
-    <main className="scenario-home">
-      <header className="scenario-heading">
-        <p className="line-label">架空のみなと鉄道</p>
-        <h1>シナリオ全体像</h1>
-        <p className="scenario-intro">
-          運行管理システムを題材に、公開サイトから中央サーバーまで、4段階でセキュリティを確認します。
-        </p>
+    <main className="rail-lab">
+      <header className="rail-hero">
+        <Image
+          src="/minato-train.png"
+          alt="青緑の帯が入った、みなと鉄道の通勤電車"
+          fill
+          priority
+          sizes="100vw"
+        />
+        <h1>みなと鉄道シナリオラボ</h1>
       </header>
 
-      <ol className="stage-flow" aria-label="4段階のシナリオ">
-        {stages.map((stage) => (
-          <li className="stage-card" key={stage.number}>
-            <div className="stage-accent" style={{ backgroundColor: stage.accent }} />
-            <div>
-              <p className="stage-number" lang="en">Stage {stage.number}</p>
-              <h2>{stage.title}</h2>
-            </div>
-            <p className="stage-description">{stage.description}</p>
-          </li>
-        ))}
-      </ol>
+      <section className="rail-scenarios" aria-labelledby="scenarios-title">
+        <h2 id="scenarios-title">シナリオ番号</h2>
+
+        <ol className="rail-scenario-list">
+          {scenarios.map((item) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                aria-pressed={item.id === scenario.id}
+                onClick={() => setScenario(item)}
+              >
+                <span>{item.id}</span>
+                {item.title}
+              </button>
+            </li>
+          ))}
+        </ol>
+
+        <p className="rail-description" role="status">{scenario.description}</p>
+      </section>
+
+      <section className="rail-cli" aria-labelledby="cli-title">
+        <header className="rail-cli-header">
+          <h2 id="cli-title">Linux CLI</h2>
+          <span>ブラウザ内デモ</span>
+        </header>
+
+        <div className="rail-output" ref={outputRef} role="log" aria-label="コマンド出力" tabIndex={0}>
+          <p><code>help</code> でコマンド一覧を表示できます。</p>
+          <p><code>cat scenario.txt</code> で選択中のシナリオを確認できます。</p>
+          {history.map((entry, index) => <pre key={index}>{entry}</pre>)}
+        </div>
+
+        <form className="rail-prompt" onSubmit={runCommand}>
+          <code aria-hidden="true">operator@minato:~$</code>
+          <input
+            aria-label="コマンド"
+            value={command}
+            onChange={(event) => setCommand(event.target.value)}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+          />
+          <button type="submit">実行</button>
+        </form>
+      </section>
 
       <style>{`
-        .scenario-home {
-          box-sizing: border-box;
+        .rail-lab {
           display: grid;
-          align-content: center;
-          gap: clamp(2rem, 7vw, 5rem);
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-rows: clamp(11rem, 31svh, 22rem) minmax(24rem, 1fr);
+          gap: .75rem;
+          width: 100%;
+          max-width: none;
           min-height: 100svh;
-          padding: clamp(1.5rem, 5vw, 5rem);
-          background: #f8f9fc;
-          color: #17213c;
-          font-family: system-ui, sans-serif;
+          padding: .75rem;
+          background: #edf1f5;
+          color: #18213b;
         }
 
-        .scenario-heading,
-        .stage-flow {
-          width: min(100%, 88rem);
-          margin-inline: auto;
+        .rail-hero {
+          position: relative;
+          isolation: isolate;
+          grid-column: 1 / -1;
+          display: flex;
+          align-items: flex-end;
+          overflow: hidden;
+          border-radius: .65rem;
         }
 
-        .line-label {
-          margin: 0 0 .55rem;
-          color: #226c84;
-          font-size: .875rem;
-          font-weight: 700;
-          letter-spacing: .1em;
+        .rail-hero img {
+          z-index: -1;
+          object-fit: cover;
+          object-position: center;
         }
 
-        .scenario-heading h1 {
+        .rail-hero h1 {
+          width: 100%;
           margin: 0;
-          font-size: clamp(2rem, 5vw, 3.75rem);
-          line-height: 1.2;
+          padding: 2rem 1.25rem 1rem;
+          background: linear-gradient(transparent, #0b1729ed);
+          color: #fff;
+          font-size: clamp(1.35rem, 3vw, 2.4rem);
         }
 
-        .scenario-intro {
-          margin: 1rem 0 0;
-          color: #41516b;
-          line-height: 1.8;
+        .rail-scenarios,
+        .rail-cli {
+          min-width: 0;
+          overflow: hidden;
+          border: 1px solid #c6d0df;
+          border-radius: .65rem;
         }
 
-        .stage-flow {
+        .rail-scenarios {
+          padding: clamp(1rem, 3vw, 2rem);
+          background: #fff;
+        }
+
+        .rail-lab h2 {
+          margin: 0;
+          font-size: 1.125rem;
+        }
+
+        .rail-scenario-list {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: clamp(1.5rem, 3vw, 3rem);
-          margin-block: 0;
+          gap: .6rem;
+          margin: 1rem 0;
           padding: 0;
           list-style: none;
         }
 
-        .stage-card {
-          position: relative;
+        .rail-scenario-list button {
           display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          min-height: 17rem;
-          padding: 1.25rem;
-          border-radius: .8rem;
-          background: #17213c;
+          align-items: center;
+          gap: .85rem;
+          width: 100%;
+          padding: .7rem .85rem;
+          border: 1px solid #c6d0df;
+          border-radius: .4rem;
+          background: #f1f5f9;
+          color: #18213b;
+          text-align: left;
+        }
+
+        .rail-scenario-list button[aria-pressed="true"] {
+          border-color: #172445;
+          background: #172445;
           color: #fff;
         }
 
-        .stage-card:not(:last-child)::after {
-          position: absolute;
-          top: 50%;
-          left: calc(100% + .25rem);
-          width: clamp(1rem, 2.25vw, 2.25rem);
-          height: 1rem;
-          background: #ef4868;
-          clip-path: polygon(0 30%, 68% 30%, 68% 0, 100% 50%, 68% 100%, 68% 70%, 0 70%);
-          content: "";
-          transform: translateY(-50%);
+        .rail-scenario-list span {
+          font: 700 1.1rem ui-monospace, monospace;
         }
 
-        .stage-accent {
-          height: .4rem;
-          border-radius: .15rem;
+        .rail-description {
+          color: #455372;
+          line-height: 1.7;
         }
 
-        .stage-number {
-          margin: 0 0 .3rem;
-          color: #c8d4ec;
-          font-size: .9rem;
-          font-weight: 700;
+        .rail-cli {
+          display: flex;
+          flex-direction: column;
+          min-height: 24rem;
+          background: #0c1321;
+          color: #e8effa;
         }
 
-        .stage-card h2 {
-          margin: 0;
-          font-size: clamp(1.15rem, 2vw, 1.6rem);
+        .rail-cli-header {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: .5rem;
+          padding: .9rem 1rem;
+          border-bottom: 1px solid #33405b;
+          background: #172445;
         }
 
-        .stage-description {
-          margin: auto 0 0;
-          color: #e0e7f6;
-          font-size: .95rem;
-          line-height: 1.75;
+        .rail-cli-header span {
+          color: #c4d2eb;
+          font-size: .8rem;
         }
 
-        @media (max-width: 900px) {
-          .stage-flow {
+        .rail-output {
+          flex: 1 1 0;
+          min-height: 12rem;
+          overflow: auto;
+          padding: 1rem;
+          font: .875rem/1.7 ui-monospace, monospace;
+        }
+
+        .rail-output pre {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+          font: inherit;
+        }
+
+        .rail-cli code {
+          color: #a9edce;
+        }
+
+        .rail-prompt {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: .5rem;
+          padding: .85rem 1rem;
+          border-top: 1px solid #33405b;
+        }
+
+        .rail-prompt input {
+          flex: 1 1 8rem;
+          min-width: 0;
+          padding: .5rem;
+          border: 1px solid #526580;
+          border-radius: .35rem;
+          background: #131e31;
+          color: #fff;
+          font: .875rem ui-monospace, monospace;
+        }
+
+        .rail-prompt button {
+          padding: .5rem .75rem;
+          border: 0;
+          border-radius: .35rem;
+          background: #a9edce;
+          color: #10281e;
+          cursor: pointer;
+        }
+
+        .rail-lab :focus-visible {
+          outline: 2px solid #468ad1;
+          outline-offset: 2px;
+        }
+
+        @media (max-width: 700px) {
+          .rail-lab {
             grid-template-columns: minmax(0, 1fr);
-            gap: 1.75rem;
-          }
-
-          .stage-card {
-            min-height: 0;
-            gap: 1rem;
-          }
-
-          .stage-card:not(:last-child)::after {
-            top: calc(100% + .375rem);
-            left: 50%;
-            width: 1rem;
-            height: 1rem;
-            transform: translateX(-50%) rotate(90deg);
+            grid-template-rows: 12rem auto minmax(24rem, 1fr);
           }
         }
       `}</style>
